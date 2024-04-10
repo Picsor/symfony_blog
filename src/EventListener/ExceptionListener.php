@@ -20,9 +20,11 @@ class ExceptionListener
         // You get the exception object from the received event
         $exception = $event->getThrowable();
         $message = sprintf(
-        'My Error says: %s with code: %s',
+        'My Error says: %s with code: %s, in file: %s at line: %s',
         $exception->getMessage(),
-        $exception->getCode()
+        $exception->getCode(),
+        $exception->getFile(),
+        $exception->getLine()
         );
 
         $this->logger->error($message);
