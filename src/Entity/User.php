@@ -36,9 +36,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    /**
-     * @var Collection<int, Article>
-     */
+    #[ORM\Column]
+    private ?string $securityQuestion = null;
+
+    #[ORM\Column]
+    private ?string $securityAnswer = null;
+
     #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'user')]
     private Collection $articles;
 
@@ -109,6 +112,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    public function getSecurityQuestion(): ?string
+    {
+        return $this->securityQuestion;
+    }
+
+    public function setSecurityQuestion(string $securityQuestion): static
+    {
+        $this->securityQuestion = $securityQuestion;
+
+        return $this;
+    }
+
+    public function getSecurityAnswer(): ?string
+    {
+        return $this->securityAnswer;
+    }
+
+    public function setSecurityAnswer(string $securityAnswer): static
+    {
+        $this->securityAnswer = $securityAnswer;
 
         return $this;
     }
