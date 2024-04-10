@@ -20,4 +20,14 @@ class VisitRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Visit::class);
     }
+
+    public function findByUserIdUnique($userId)
+    {
+        return $this->createQueryBuilder('v')
+            ->andWhere('v.userId = :userId')
+            ->setParameter('userId', $userId)
+            ->groupBy('v.articleId')
+            ->getQuery()
+            ->getResult();
+    }
 }

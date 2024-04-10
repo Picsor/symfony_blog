@@ -2,6 +2,7 @@
 // src/Controller/BlogController.php
 namespace App\Controller;
 use App\Entity\Article;
+use App\Entity\Visit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 // Allow to link to a route
@@ -38,7 +39,14 @@ class AppController extends AbstractController
         foreach ($articles as $article) {
             // append to article_data
             $articles_data[] = ["id" => $article->getId(), "title" => $article->getTitle(), "date" => $article->getDate(), "content" => $article->getContent()];
-        } 
+        }
+
+
+        $visit = new Visit();
+        $visit->setArticleId($article->getId());
+        $visit->setUserId($this->getUser()->getId());
+        $entityManager->persist($visit);
+        $entityManager->flush();
 
         return $this->render('blog_article.html.twig', [
         'article' => $article_data,

@@ -15,7 +15,8 @@ class UserProfileController extends AbstractController
     // Get parameter from request
     public function show_profile(): Response
     {
-        // $this->getUser()->getUserIdentifier();
+         $this->getUser()->getUserIdentifier();
+
         // Return a response
         return $this->render('profile.html.twig');
     }
