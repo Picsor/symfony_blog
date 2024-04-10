@@ -16,8 +16,8 @@ security:
       provider: app_user_provider
       # Similar to rate limit for auth
       login_throttling:
-        max_attempts: 3
-        interval: "15 minutes"
+        max_attempts: 999
+        interval: "1 seconds"
       # The auth logic to authenticate the user
       custom_authenticator: App\Security\LoginFormAuthenticator
       # The entry point is the route that the user will be redirected to
