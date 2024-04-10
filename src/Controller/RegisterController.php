@@ -37,6 +37,8 @@ class RegisterController extends AbstractController
 
         // Case no user, create one
         $admin = new User();
+        $admin->setSecurityQuestion('default');
+        $admin->setSecurityAnswer('default');
         $admin->setUsername($username);
         $admin->setPassword($password);
 
