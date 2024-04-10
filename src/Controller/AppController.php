@@ -1,10 +1,13 @@
 <?php
 // src/Controller/BlogController.php
 namespace App\Controller;
+use App\Form\CommentType;
+use App\Entity\Comment;
 use App\Entity\Article;
 use App\Entity\Visit;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 // Allow to link to a route
 use Symfony\Component\Routing\Attribute\Route;
 // Allow additionnal methods like rendering template, redirect, generate url...
@@ -26,7 +29,10 @@ class AppController extends AbstractController
     #[Route('/blog/{id}', name: 'article', methods: ['GET'], requirements: ['id' => '\d+'])]
     // Get parameter from request
     
-    public function article(Article $article = null, EntityManagerInterface $entityManager, LoggerInterface $logger): Response
+    public function article(Article $article = null, 
+    EntityManagerInterface $entityManager, 
+    LoggerInterface $logger,
+    Request $request): Response
     {
         $article_data = [];
         if ($article) {
@@ -41,7 +47,21 @@ class AppController extends AbstractController
             $articles_data[] = ["id" => $article->getId(), "title" => $article->getTitle(), "date" => $article->getDate(), "content" => $article->getContent()];
         }
 
-
+        $form = $this->createForm(CommentType::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+            $connectedUser = $this->getUser();
+            $comment = new Comment();
+            $comment->setUser($connectedUser);
+            $comment->setArticle($article);
+            $comment->setContent($data['comment']);
+            if ($connectedUser) {
+                $connectedUser->addComment($comment);
+            }
+            $entityManager->persist($comment);
+            $entityManager->flush();
+        }
         $visit = new Visit();
         $visit->setArticleId($article->getId());
         $visit->setUserId($this->getUser()->getId());

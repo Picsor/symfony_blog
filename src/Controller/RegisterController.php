@@ -123,7 +123,7 @@ class RegisterController extends AbstractController
                 $msg = "L'utilisateur existe déjà : échec de la création";
             }
             $loggerInterface->info($msg);
-            return new Response("<html>".$msg."</html>");
+            return new Response("<html><body>".$msg."</body></html>");
             
         }
         return $this->render("register.html.twig", [
