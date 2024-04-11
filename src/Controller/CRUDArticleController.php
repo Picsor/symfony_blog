@@ -18,6 +18,7 @@ use Symfony\Component\Lock\Lock;
 use Symfony\Component\Lock\Store\DoctrineDbalStore;
 use app\Service\AuthenticationService;
 
+
 // Instanciate elements
 function get_lock(string $name)
 {
@@ -51,7 +52,7 @@ class CRUDArticleController extends AbstractController
     }
 
     #[Route('/new', name: 'app_admin_article_new', methods: ['GET', 'POST'])]
-    public function new(AuthenticationService $auth, Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $article = new Article();
         $form = $this->createForm(ArticleType::class, $article);
@@ -126,7 +127,7 @@ class CRUDArticleController extends AbstractController
     #[Route('/api/create', name: 'api_article_create', methods: ['POST'])]
     public function api_create(AuthenticationService $auth,Request $request, EntityManagerInterface $entityManager): Response
     {
-        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN") == true) {
+        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN", $entityManager, "[ROLE_ADMIN]") == true) {
         $data = json_decode($request->getContent(), true);
         $article = new Article();
         $article->setTitle($data['title']);
@@ -141,7 +142,7 @@ class CRUDArticleController extends AbstractController
     #[Route('/api/update/{id}', name: 'api_article_update', methods: ['PUT'])]
     public function api_update(AuthenticationService $auth,Request $request, EntityManagerInterface $entityManager, int $id): Response
     {
-        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN", ) == true) {
+        if ($auth->AuthenticateJwt("Bearer REALLY_SECURED_TOKEN", $entityManager, "[ROLE_ADMIN]" ) == true) {
         $data = json_decode($request->getContent(), true);
         $article = $entityManager->getRepository(Article::class)->find($id);
         $article->setTitle($data['title']);
@@ -156,7 +157,7 @@ class CRUDArticleController extends AbstractController
     #[Route('/api/delete/{id}', name: 'api_article_delete', methods: ['DELETE'])]
     public function api_delete(AuthenticationService $auth, EntityManagerInterface $entityManager, int $id): Response
     {
-        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN") == true) {
+        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN", $entityManager, "[ROLE_ADMIN]") == true) {
             $article = $entityManager->getRepository(Article::class)->find($id);
             $entityManager->remove($article);
             $entityManager->flush();
@@ -167,7 +168,7 @@ class CRUDArticleController extends AbstractController
     #[Route('/api/read', name: 'api_article_read', methods: ['GET'])]
     public function api_read(AuthenticationService $auth, EntityManagerInterface $entityManager): Response
     {
-        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN") == true) {
+        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN", $entityManager, "[ROLE_ADMIN]") == true) {
             $articles = $entityManager->getRepository(Article::class)->findAll();
             $data = [];
             foreach ($articles as $article) {
