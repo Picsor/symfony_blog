@@ -1,0 +1,17 @@
+{% extends "base.html.twig" %}
+{% block title %}Admin dashboard page{% endblock %}
+{% block title_header %}Admin dashboard{% endblock %}
+{% block content %}
+<main style="min-height: 75vh" class="container">
+    <h1>Request Monitoring</h1>
+    <div class='d-flex flex-column'>
+    {% for ip in ips %}
+        <div class ='d-flex flex-column border border-primary rounded mt-3 p-3 h-100'>
+            <p>Adresse ip :{{ip.ip}}</p>
+            <p>Nombre de requêtes :{{ip.visitCount}}</p>
+        </div>
+    {% endfor %}
+    </div>
+    <a class="btn btn-info mt-3" href="{{ path('admin_dashboard') }}">Admin Dashboard</a>
+</main>
+{% endblock content %}

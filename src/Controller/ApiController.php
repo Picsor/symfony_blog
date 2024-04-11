@@ -3,7 +3,9 @@
 namespace App\Controller;
 use App\Entity\Article;
 use App\Entity\User;
+use App\Entity\VisitorIP;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 // Allow to link to a route
 use Symfony\Component\Routing\Attribute\Route;
@@ -13,8 +15,9 @@ class ApiController extends AbstractController
 {
     #[Route('/api/articles', name: 'api_articles', methods: ['GET'])]
     // Get parameter from request
-    public function api_articles(EntityManagerInterface $entityManager): Response
+    public function api_articles(EntityManagerInterface $entityManager, Request $request): Response
     {
+        $this->addIpToMonitoring($entityManager, $request);
         try {
             // Get articles from DB
             $articles = $entityManager->getRepository(Article::class)->findAll();
@@ -95,6 +98,26 @@ class ApiController extends AbstractController
         }catch(e) {
             // Case error
             return new Response('[]', 500, ['Content-Type'=> 'application/json']);
+        }
+    }
+
+    private function addIpToMonitoring(EntityManagerInterface $entityManager, Request $request): void {
+        $ip = $request->getClientIp();
+        if($ip == "::1"){//hotfix for localhost??
+            $ip = "127:0:0:1";
+        }
+        //check if ip already exists in table VisitorIP
+        $ipExist = $entityManager->getRepository(VisitorIP::class)->findOneBy(['ip'=> $ip]);
+        if(!$ipExist) {
+            $toCreate = new VisitorIP();
+            $toCreate->setIp($ip);
+            $toCreate->setVisitCount(1);
+            $entityManager->persist($toCreate);
+            $entityManager->flush();
+        }else{
+            $ipExist->setVisitCount($ipExist->getVisitCount() + 1);
+            $entityManager->persist($ipExist);
+            $entityManager->flush();
         }
     }
 }
