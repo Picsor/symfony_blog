@@ -19,6 +19,10 @@ security:
         max_attempts: 3
         interval: "15 minutes"
       # The auth logic to authenticate the user
+      json_login:
+                # api_login is a route we will create below
+                check_path: api_login
+
       custom_authenticator: App\Security\LoginFormAuthenticator
       # The entry point is the route that the user will be redirected to
       # if they try to access a protected page without being authenticated
