@@ -3,6 +3,7 @@ namespace App\Service;
 use App\Entity\User;
 use Doctrine\ORM\EntityManager;
 
+namespace App\Service;
 class AuthenticationService
 {
     public function AuthenticateJwt($jwt, EntityManager $em, $target_role)

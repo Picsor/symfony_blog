@@ -16,6 +16,7 @@ use Symfony\Component\Lock\Key;
 use Symfony\Component\Lock\Lock;
 // Allow to store lock state on MySQL using Doctrine
 use Symfony\Component\Lock\Store\DoctrineDbalStore;
+use app\Service\AuthenticationService;
 
 // Instanciate elements
 function get_lock(string $name)
@@ -50,7 +51,7 @@ class CRUDArticleController extends AbstractController
     }
 
     #[Route('/new', name: 'app_admin_article_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(AuthenticationService $auth, Request $request, EntityManagerInterface $entityManager): Response
     {
         $article = new Article();
         $form = $this->createForm(ArticleType::class, $article);
@@ -73,6 +74,7 @@ class CRUDArticleController extends AbstractController
             'form' => $form,
         ]);
     }
+
 
     #[Route('/{id}', name: 'app_admin_article_show', methods: ['GET'])]
     public function show(Article $article): Response
@@ -119,5 +121,65 @@ class CRUDArticleController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin_article_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/api/create', name: 'api_article_create', methods: ['POST'])]
+    public function api_create(AuthenticationService $auth,Request $request, EntityManagerInterface $entityManager): Response
+    {
+        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN") == true) {
+        $data = json_decode($request->getContent(), true);
+        $article = new Article();
+        $article->setTitle($data['title']);
+        $article->setContent($data['content']);
+        $article->setDate($data['date']);
+        $entityManager->persist($article);
+        $entityManager->flush();
+        }
+        return new Response('{"id":'.$article->getId().'}', 200, ['Content-Type'=> 'application/json']);
+    }
+
+    #[Route('/api/update/{id}', name: 'api_article_update', methods: ['PUT'])]
+    public function api_update(AuthenticationService $auth,Request $request, EntityManagerInterface $entityManager, int $id): Response
+    {
+        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN", ) == true) {
+        $data = json_decode($request->getContent(), true);
+        $article = $entityManager->getRepository(Article::class)->find($id);
+        $article->setTitle($data['title']);
+        $article->setContent($data['content']);
+        $article->setDate($data['date']);
+        $entityManager->persist($article);
+        $entityManager->flush();
+        }
+        return new Response('{"id":'.$article->getId().'}', 200, ['Content-Type'=> 'application/json']);
+    }
+
+    #[Route('/api/delete/{id}', name: 'api_article_delete', methods: ['DELETE'])]
+    public function api_delete(AuthenticationService $auth, EntityManagerInterface $entityManager, int $id): Response
+    {
+        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN") == true) {
+            $article = $entityManager->getRepository(Article::class)->find($id);
+            $entityManager->remove($article);
+            $entityManager->flush();
+        }
+        return new Response('{"id":' . $id . '}', 200, ['Content-Type' => 'application/json']);
+    }
+
+    #[Route('/api/read', name: 'api_article_read', methods: ['GET'])]
+    public function api_read(AuthenticationService $auth, EntityManagerInterface $entityManager): Response
+    {
+        if ($auth->AuthenticateJwt("REALLY_SECURED_TOKEN") == true) {
+            $articles = $entityManager->getRepository(Article::class)->findAll();
+            $data = [];
+            foreach ($articles as $article) {
+                $data[] = [
+                    'title' => $article->getTitle(),
+                    'content' => $article->getContent(),
+                    'date' => $article->getDate(),
+                    'id' => $article->getId(),
+                ];
+            }
+            $json = json_encode($data);
+        }
+        return new Response($json, 200, ['Content-Type' => 'application/json']);
     }
 }
