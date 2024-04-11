@@ -112,10 +112,6 @@ class RegisterController extends AbstractController
 
             $msg = "";
             if (!$userExist) {
-                $loggerInterface->info($toCreate->getUsername());
-                $loggerInterface->info($password);
-                $loggerInterface->info($question);
-                $loggerInterface->info($answer);
                 $entityManager->persist($toCreate);
                 $entityManager->flush();
                 $msg = "Compte Créé";

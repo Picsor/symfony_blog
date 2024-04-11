@@ -2,6 +2,7 @@
 namespace App\Service;
 use App\Entity\User;
 
+namespace App\Service;
 class AuthenticationService
 {
     public function AuthenticateJwt($jwt, User $user, $target_role)

@@ -2,6 +2,7 @@
 // src/Controller/BlogController.php
 namespace App\Controller;
 use App\Entity\Article;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 // Allow to link to a route
@@ -24,7 +25,8 @@ class ApiController extends AbstractController
                 $data["article_".$article->getId()] = ["id" => $article->getId(),
                 "title" => $article->getTitle(), 
                 "date" => $article->getDate(),
-                "content" => $article->getContent()];
+                "content" => $article->getContent(),
+                "user" => $article->getUser()->getUsername()];
             } // Format to json
             $json = json_encode($data);
             // Send response
@@ -67,6 +69,32 @@ class ApiController extends AbstractController
         }catch(e) {
             // Case error
             return new Response('{}', 500, ['Content-Type'=> 'application/json']);
+        }
+    }
+    #[Route(path:"/api/article/user/{id}", name:"api_article_user", methods: ['GET'])]
+    public function api_article_user(int $id, EntityManagerInterface $entityManager): Response {
+        try {
+
+            // Get list of articles
+            $articles = $entityManager->getRepository(Article::class)->findBy(['user' => $id]);
+            $data = [];
+            // Determine data to send on API
+            foreach($articles as $article) {
+                $data[] = [
+                        'title' => $article->getTitle(),
+                        'content' => $article->getContent(),
+                        'date' => $article->getDate(),
+                        'id' => $article->getId(),
+                    ];
+            }
+
+            // Format to json
+            $json = json_encode($data);
+            // Send response (data, status, header)
+            return new Response($json, 200, ['Content-Type'=> 'application/json']);
+        }catch(e) {
+            // Case error
+            return new Response('[]', 500, ['Content-Type'=> 'application/json']);
         }
     }
 }

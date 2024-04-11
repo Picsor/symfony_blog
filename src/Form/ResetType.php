@@ -13,6 +13,7 @@ class ResetType extends AbstractType
 public function buildForm(FormBuilderInterface $builder, array $options)
     {
     $builder
+
         ->add('username', textType::class)
         ->add('question', textType::class)
         ->add('reponse', textType::class)

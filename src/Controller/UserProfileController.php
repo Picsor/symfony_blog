@@ -2,7 +2,9 @@
 // src/Controller/AdminController.php
 namespace App\Controller;
 // Allow to send a response
+use App\Entity\Article;
 use App\Entity\User;
+use App\Form\ChangePasswordType;
 use App\Form\ResetType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
