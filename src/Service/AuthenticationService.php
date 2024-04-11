@@ -1,7 +1,6 @@
 <?php
 namespace App\Service;
 use App\Entity\User;
-namespace App\Service;
 use Doctrine\ORM\EntityManagerInterface;
 
 class AuthenticationService
