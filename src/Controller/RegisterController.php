@@ -3,8 +3,8 @@
 namespace App\Controller;
 // Allow to send a response
 use Psr\Log\LoggerInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 // Allow to link to a route
 use Symfony\Component\Routing\Attribute\Route;
 // Allow additionnal methods like rendering template, redirect, generate url...
@@ -16,8 +16,7 @@ use Doctrine\ORM\EntityManagerInterface;
 // Allow hashing password
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-
-use App\Form\UserRegistrationType;
+use App\Form\RegisterType;
 class RegisterController extends AbstractController
 {
 // Route to link with and name to identify it
@@ -27,29 +26,30 @@ class RegisterController extends AbstractController
     public function register_admin(string $username, string $password, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator): Response
     {
         // Reset users
-        $users = $entityManager->getRepository(User::class)->findAll();
-        foreach ($users as $user) {
-            $entityManager->remove($user);
-            $entityManager->flush();
-        }
+        //$users = $entityManager->getRepository(User::class)->findAll();
+        //foreach ($users as $user) {
+        //    $entityManager->remove($user);
+        //    $entityManager->flush();
+        //}
 
         // Check if already one user at least
         $users = $entityManager->getRepository(User::class)->findAll();
-        if (count($users) != 0) {
-         return new Response('User already exists');
-        } 
+        for( $i = 0; $i < count($users); $i++ ) {
+            $user = $users[$i];
+            if($user->getUsername() == $username) {
+                return new Response('User already exists', 403);
+            }
+        }
 
         // Case no user, create one
         $admin = new User();
-        $admin->setSecurityQuestion('default');
-        $admin->setSecurityAnswer('default');
         $admin->setUsername($username);
         $admin->setPassword($password);
 
         // Check if valid after setting values and before hash
         $errors = $validator->validate($admin);
         if (count($errors) > 0) {
-        return new Response((string) $errors, 400);
+        return new Response((string) $errors, 403);
         }
         $hashedPassword = $passwordHasher->hashPassword(
         $admin,
@@ -66,13 +66,9 @@ class RegisterController extends AbstractController
         return new Response('Registered');
     }
 
-    #[Route('/register/user', name:'user_register', methods:["GET", "POST"])]
-    public function registerUser(EntityManagerInterface $entityManager, 
-    UserPasswordHasherInterface $passwordHasher, 
-    ValidatorInterface $validator, 
-    Request $request,
-    LoggerInterface $loggerInterface): Response{
-        $form = $this->createForm(UserRegistrationType::class);
+    #[Route('register', name:'registration', methods:["Get", "POST"])]
+    public function register_user(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ValidatorInterface $validator, Request $request, LoggerInterface $loggerInterface) : Response {
+        $form = $this->createForm(RegisterType::class);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -80,16 +76,12 @@ class RegisterController extends AbstractController
             $data = $form->getData();
             $username = $data["username"];
             $password = $data["password"];
-            $question = $data["question"];
-            $answer = $data["reponse"];
 
             $toCreate = new User();
 
             $toCreate->setUsername($username);
             $toCreate->setPassword($password);
             $toCreate->setRoles(["ROLE_USER"]);
-            $toCreate->setSecurityQuestion($question);
-            $toCreate->setSecurityAnswer($answer);
             
 
             $errors = $validator->validate($toCreate);
@@ -112,10 +104,6 @@ class RegisterController extends AbstractController
 
             $msg = "";
             if (!$userExist) {
-                $loggerInterface->info($toCreate->getUsername());
-                $loggerInterface->info($password);
-                $loggerInterface->info($question);
-                $loggerInterface->info($answer);
                 $entityManager->persist($toCreate);
                 $entityManager->flush();
                 $msg = "Compte Créé";
@@ -123,7 +111,7 @@ class RegisterController extends AbstractController
                 $msg = "L'utilisateur existe déjà : échec de la création";
             }
             $loggerInterface->info($msg);
-            return new Response("<html><body>".$msg."</body></html>");
+            return new Response("<html>".$msg."</html>");
             
         }
         return $this->render("register.html.twig", [

@@ -1,13 +1,13 @@
 <?php
 // src/Controller/BlogController.php
 namespace App\Controller;
-use App\Form\CommentType;
-use App\Entity\Comment;
 use App\Entity\Article;
-use App\Entity\Visit;
+use App\Entity\Menu;
+use App\Entity\Reservation;
+use App\Form\ReservationType;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 // Allow to link to a route
 use Symfony\Component\Routing\Attribute\Route;
 // Allow additionnal methods like rendering template, redirect, generate url...
@@ -29,10 +29,7 @@ class AppController extends AbstractController
     #[Route('/blog/{id}', name: 'article', methods: ['GET'], requirements: ['id' => '\d+'])]
     // Get parameter from request
     
-    public function article(Article $article = null, 
-    EntityManagerInterface $entityManager, 
-    LoggerInterface $logger,
-    Request $request): Response
+    public function article(Article $article = null, EntityManagerInterface $entityManager, LoggerInterface $logger): Response
     {
         $article_data = [];
         if ($article) {
@@ -45,28 +42,7 @@ class AppController extends AbstractController
         foreach ($articles as $article) {
             // append to article_data
             $articles_data[] = ["id" => $article->getId(), "title" => $article->getTitle(), "date" => $article->getDate(), "content" => $article->getContent()];
-        }
-
-        $form = $this->createForm(CommentType::class);
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $connectedUser = $this->getUser();
-            $comment = new Comment();
-            $comment->setUser($connectedUser);
-            $comment->setArticle($article);
-            $comment->setContent($data['comment']);
-            if ($connectedUser) {
-                $connectedUser->addComment($comment);
-            }
-            $entityManager->persist($comment);
-            $entityManager->flush();
-        }
-        $visit = new Visit();
-        $visit->setArticleId($article->getId());
-        $visit->setUserId($this->getUser()->getId());
-        $entityManager->persist($visit);
-        $entityManager->flush();
+        } 
 
         return $this->render('blog_article.html.twig', [
         'article' => $article_data,
@@ -75,18 +51,23 @@ class AppController extends AbstractController
     }
 
     // Route to link with and name to identify it
-    #[Route('/blog', name: 'blog')]
+    #[Route('/menus', name: 'blog')]
     // Get parameter from request
     public function blog(EntityManagerInterface $entityManager): Response
     {
         // Articles
-        $articles = $entityManager->getRepository(Article::class)->findAll();
-        $articles_data = [];
-        foreach ($articles as $article) {
+        $menus = $entityManager->getRepository(Menu::class)->findAll();
+        $menus_data = [];
+        foreach ($menus as $menu) {
             // append to article_data
-            $articles_data[] = ["id" => $article->getId(), "title" => $article->getTitle(), "date" => $article->getDate(), "content" => $article->getContent()];
+            $menus_data[] = ['id'=> $menu->getId(),
+                'name'=> $menu->getName(),
+                'startDish'=> $menu->getStartDish(),
+                'mainDish'=> $menu->getMainDish(),
+                'desert'=> $menu->getDesert(),
+            ];
         } 
-        return $this->render('blog.html.twig', ['articles' => $articles_data]);
+        return $this->render('menus.html.twig', ['menus' => $menus_data]);
 
     }
 
@@ -107,7 +88,65 @@ class AppController extends AbstractController
 
         return $this->render('login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
+    #[Route('reservation', name:'reservation', methods:["GET", "POST"])]
+    public function makeReservation(EntityManagerInterface $entityManager, Request $request, LoggerInterface $loggerInterface) : Response {
+        $reservation = new Reservation();
+        $form = $this->createForm(ReservationType::class, $reservation);
 
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $day = $reservation->getDate()->format("D");
+            $time = (integer) $reservation->getDate()->format("H");
+            if($this->getUser()){
+                $reservation->setUser($this->getUser());
+            }
+            if($day == "Sun"){
+                return new Response("Mauvais jour", 403);
+            }
+            if($time > 10 && $time < 15){
+                $entityManager->persist($reservation);
+                $entityManager->flush();
+                return $this->redirectToRoute('home');
+            }
+            else if ($time > 17 && $time < 21){
+                $entityManager->persist($reservation);
+                $entityManager->flush();
+                return $this->redirectToRoute('home');
+            }
+            $loggerInterface->info($reservation->getName());
+
+            
+            
+        }
+        return $this->render("reservation.html.twig", [
+            "form"=> $form 
+        ]);
+    }
+
+    #[Route('/reservations', name: 'my_reservations', methods:["GET"])]
+    // Get parameter from request
+    public function reservations(EntityManagerInterface $entityManager): Response
+    {
+        // Articles
+        $user = $this->getUser();
+        $reservations = $entityManager->getRepository(Reservation::class)->findBy([
+            "user"=> $user,
+        ]);
+        $reservations_data = [];
+        foreach ($reservations as $reservation) {
+            $day = $reservation->getDate()->format("Y-m-d");
+            $time = $reservation->getDate()->format("H");
+            $minutes = $reservation->getDate()->format("i");
+            $reservations_data[] = ['id'=> $reservation->getId(),
+                'name'=> $reservation->getName(),
+                'firsName'=> $reservation->getFirsName(),
+                'email'=> $reservation->getEmail(),
+                'date'=> $day." ".$time."h".$minutes,
+            ];
+        } 
+        return $this->render('reservations.html.twig', ['reservations' => $reservations_data]);
+
+    }
     #[Route(path: '/logout', name: 'app_logout')]
     public function logout(): void
     {

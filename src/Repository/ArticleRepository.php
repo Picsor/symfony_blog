@@ -21,16 +21,6 @@ class ArticleRepository extends ServiceEntityRepository
         parent::__construct($registry, Article::class);
     }
 
-    public function findArticleByIdList(array $id)
-    {
-        return $this->createQueryBuilder("c")
-            ->where("c.id IN (:id)")
-            ->setParameter("id", $id)
-            ->distinct()
-            ->getQuery()
-            ->getResult();
-    }
-
     //    /**
     //     * @return Article[] Returns an array of Article objects
     //     */

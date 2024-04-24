@@ -14,9 +14,9 @@
             <tr>
                 <th>Id</th>
                 <th>Title</th>
-                <th>Date</th>
-                <th>Content</th>
-                <th>Username</th>
+                <th>Entrée</th>
+                <th>Plat</th>
+                <th>Dessert</th>
                 <th>actions</th>
             </tr>
         </thead>
@@ -24,10 +24,10 @@
         {% for article in articles %}
             <tr>
                 <td class="pt-3">{{ article.id }}</td>
-                <td class="pt-3">{{ article.title }}</td>
-                <td class="pt-3">{{ article.date }}</td>
-                <td class="pt-3">{{ article.content }}</td>
-                <td class="pt-3">{{ article.user.username|default('None') }}</td>
+                <td class="pt-3">{{ article.name }}</td>
+                <td class="pt-3">{{ article.startDish }}</td>
+                <td class="pt-3">{{ article.mainDish }}</td>
+                <td class="pt-3">{{ article.desert }}</td>
                 <td>
                     <a class="m-1 btn btn-info" href="{{ path('app_admin_article_show', {'id': article.id}) }}">show</a>
                     <a class="m-1 btn btn-warning" href="{{ path('app_admin_article_edit', {'id': article.id}) }}">edit</a>

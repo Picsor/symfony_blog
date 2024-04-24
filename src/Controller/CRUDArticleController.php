@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Article;
+use App\Entity\Menu;
 use App\Entity\User;
 use App\Form\ArticleType;
 use App\Repository\ArticleRepository;
+use App\Repository\MenuRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,65 +40,62 @@ function get_lock(string $name)
     return $lock;
 }
 
-#[Route('/admin/article')]
+#[Route('/admin/menu')]
 class CRUDArticleController extends AbstractController
 {
     #[Route('/', name: 'app_admin_article_index', methods: ['GET'])]
-    public function index(ArticleRepository $articleRepository): Response
+    public function index(MenuRepository $menuRepository): Response
     {
         return $this->render('admin_article/index.html.twig', [
-            'articles' => $articleRepository->findAll(),
+            'articles' => $menuRepository->findAll(),
         ]);
     }
 
     #[Route('/new', name: 'app_admin_article_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $article = new Article();
-        $form = $this->createForm(ArticleType::class, $article);
+        $menu = new Menu();
+        $form = $this->createForm(ArticleType::class, $menu);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Add current logged user as author
-            $user = $entityManager->getRepository(User::class)->findOneBy(['username' =>
-            $this->getUser()->getUserIdentifier()]);
-            $user->addArticle($article);
-            $entityManager->persist($user);
-            $entityManager->persist($article);
+            $entityManager->persist($menu);
             $entityManager->flush();
 
             return $this->redirectToRoute('app_admin_article_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('admin_article/new.html.twig', [
-            'article' => $article,
+            'article' => $menu,
             'form' => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'app_admin_article_show', methods: ['GET'])]
-    public function show(Article $article): Response
+    public function show(Menu $menu): Response
     {
         return $this->render('admin_article/show.html.twig', [
-            'article' => $article,
+            'article' => $menu,
         ]);
     }
 
     #[Route('/{id}/edit', name: 'app_admin_article_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Article $article, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Menu $menu, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(ArticleType::class, $article);
+        $form = $this->createForm(ArticleType::class, $menu);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Get lock for this article editing
-            $edit_lock = get_lock("article_edit_".$article->getId());
+            $entityManager->flush();
+            $edit_lock = get_lock("article_edit_".$menu->getId());
 
             // Case lock is acquired from another user, request will wait
             // Case not locked, lock it to avoid concurrent editing
             if(!$edit_lock->isAcquired()) {
                 $edit_lock->acquire(true);
-                $entityManager->flush();
+                
                 // Case no release, wait for ttl
                 $edit_lock->release();
 
@@ -105,16 +104,16 @@ class CRUDArticleController extends AbstractController
         }
 
         return $this->render('admin_article/edit.html.twig', [
-            'article' => $article,
+            'article' => $menu,
             'form' => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'app_admin_article_delete', methods: ['POST'])]
-    public function delete(Request $request, Article $article, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Menu $menu, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->getPayload()->get('_token'))) {
-            $entityManager->remove($article);
+        if ($this->isCsrfTokenValid('delete'.$menu->getId(), $request->getPayload()->get('_token'))) {
+            $entityManager->remove($menu);
             $entityManager->flush();
         }
 

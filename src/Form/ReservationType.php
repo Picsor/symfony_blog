@@ -4,13 +4,16 @@ namespace App\Form;
 
 use App\Entity\Article;
 use App\Entity\Menu;
+use App\Entity\Reservation;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ArticleType extends AbstractType
+class ReservationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -18,27 +21,28 @@ class ArticleType extends AbstractType
         $builder
         ->add('name', TextType::class, [
             'required' => true,
-            'attr' => ['placeholder' => 'Nom de votre menu']
+            'attr' => ['placeholder' => 'Votre nom de famille']
         ])
-        ->add('startDish', TextType::class, [
+        ->add('firsName', TextType::class, [
             'required' => true,
-            'attr' => ["placeholder' => 'Nom de l'entrée"]
+            'attr' => ["placeholder' => 'Votre prénom"]
         ])
-        ->add('mainDish', TextareaType::class, [
+        ->add('email', TextareaType::class, [
             'required' => true,
-            'attr' => ['placeholder' => 'Nom du plat principal']
+            'attr' => ['placeholder' => 'votre email']
         ])
-        ->add('desert', TextareaType::class, [
+        ->add('date', DateTimeType::class, [
             'required'=> true,
-            'attr'=> [ 'placeholder' => 'Nom du dessert']
+            'attr'=> [ 'placeholder' => 'date de votre repas']
         ])
+        ->add('envoyer', SubmitType::class)
     ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Menu::class,
+            'data_class' => Reservation::class,
         ]);
     }
 }

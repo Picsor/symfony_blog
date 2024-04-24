@@ -36,25 +36,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column]
-    private ?string $securityQuestion = null;
-
-    #[ORM\Column]
-    private ?string $securityAnswer = null;
-
+    /**
+     * @var Collection<int, Article>
+     */
     #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'user')]
     private Collection $articles;
 
     /**
-     * @var Collection<int, Comment>
+     * @var Collection<int, Reservation>
      */
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'User', orphanRemoval: true)]
-    private Collection $comments;
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'user')]
+    private Collection $reservations;
 
     public function __construct()
     {
         $this->articles = new ArrayCollection();
-        $this->comments = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,30 +120,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getSecurityQuestion(): ?string
-    {
-        return $this->securityQuestion;
-    }
-
-    public function setSecurityQuestion(string $securityQuestion): static
-    {
-        $this->securityQuestion = $securityQuestion;
-
-        return $this;
-    }
-
-    public function getSecurityAnswer(): ?string
-    {
-        return $this->securityAnswer;
-    }
-
-    public function setSecurityAnswer(string $securityAnswer): static
-    {
-        $this->securityAnswer = $securityAnswer;
-
-        return $this;
-    }
-
     /**
      * @see UserInterface
      */
@@ -198,29 +171,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Comment>
+     * @return Collection<int, Reservation>
      */
-    public function getComments(): Collection
+    public function getReservations(): Collection
     {
-        return $this->comments;
+        return $this->reservations;
     }
 
-    public function addComment(Comment $comment): static
+    public function addReservation(Reservation $reservation): static
     {
-        if (!$this->comments->contains($comment)) {
-            $this->comments->add($comment);
-            $comment->setUser($this);
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeComment(Comment $comment): static
+    public function removeReservation(Reservation $reservation): static
     {
-        if ($this->comments->removeElement($comment)) {
+        if ($this->reservations->removeElement($reservation)) {
             // set the owning side to null (unless already changed)
-            if ($comment->getUser() === $this) {
-                $comment->setUser(null);
+            if ($reservation->getUser() === $this) {
+                $reservation->setUser(null);
             }
         }
 
