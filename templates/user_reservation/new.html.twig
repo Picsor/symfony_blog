@@ -1,0 +1,16 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Reservation page{% endblock %}
+{% block title_header %}Reservation{% endblock %}
+
+{% block content %}
+
+<main style="min-height: 75vh" class="container">
+    <h1>Create new Reservation</h1>
+
+    {{ include('user_reservation/_form.html.twig') }}
+
+    <p style="margin-top: 20px; font-weight: bold"> Vous serez redirigé vers la liste de vos réservations en cas de succès,
+    sinon vous resterez sur cette page.</p>
+</main>
+{% endblock content %}

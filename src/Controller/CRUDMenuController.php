@@ -2,10 +2,9 @@
 
 namespace App\Controller;
 
-use App\Entity\Article;
-use App\Entity\User;
-use App\Form\ArticleType;
-use App\Repository\ArticleRepository;
+use App\Entity\Menu;
+use App\Form\MenuType;
+use App\Repository\MenuRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,59 +37,57 @@ function get_lock(string $name)
     return $lock;
 }
 
-#[Route('/admin/article')]
-class CRUDArticleController extends AbstractController
+#[Route('/admin/menu')]
+class CRUDMenuController extends AbstractController
 {
-    #[Route('/', name: 'app_admin_article_index', methods: ['GET'])]
-    public function index(ArticleRepository $articleRepository): Response
+    #[Route('/', name: 'app_admin_menu_index', methods: ['GET'])]
+    public function index(MenuRepository $menuRepository): Response
     {
-        return $this->render('admin_article/index.html.twig', [
-            'articles' => $articleRepository->findAll(),
+        return $this->render('admin_menu/index.html.twig', [
+            'menus' => $menuRepository->findAll(),
         ]);
     }
 
-    #[Route('/new', name: 'app_admin_article_new', methods: ['GET', 'POST'])]
+    #[Route('/new', name: 'app_admin_menu_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
-        $article = new Article();
-        $form = $this->createForm(ArticleType::class, $article);
+        $menu = new Menu();
+        $form = $this->createForm(MenuType::class, $menu);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Add current logged user as author
-            $user = $entityManager->getRepository(User::class)->findOneBy(['username' =>
-            $this->getUser()->getUserIdentifier()]);
-            $user->addArticle($article);
-            $entityManager->persist($user);
-            $entityManager->persist($article);
+            // $user = $entityManager->getRepository(User::class)->findOneBy(['username' =>
+            // $this->getUser()->getUserIdentifier()]);
+            $entityManager->persist($menu);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_admin_article_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_admin_menu_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('admin_article/new.html.twig', [
-            'article' => $article,
+        return $this->render('admin_menu/new.html.twig', [
+            'menu' => $menu,
             'form' => $form,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_admin_article_show', methods: ['GET'])]
-    public function show(Article $article): Response
+    #[Route('/{id}', name: 'app_admin_menu_show', methods: ['GET'])]
+    public function show(Menu $menu): Response
     {
-        return $this->render('admin_article/show.html.twig', [
-            'article' => $article,
+        return $this->render('admin_menu/show.html.twig', [
+            'menu' => $menu,
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_admin_article_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Article $article, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}/edit', name: 'app_admin_menu_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Menu $menu, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(ArticleType::class, $article);
+        $form = $this->createForm(MenuType::class, $menu);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Get lock for this article editing
-            $edit_lock = get_lock("article_edit_".$article->getId());
+            $edit_lock = get_lock("menu_edit_".$menu->getId());
 
             // Case lock is acquired from another user, request will wait
             // Case not locked, lock it to avoid concurrent editing
@@ -101,20 +98,20 @@ class CRUDArticleController extends AbstractController
                 $edit_lock->release();
 
             }
-            return $this->redirectToRoute('app_admin_article_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_admin_menu_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('admin_article/edit.html.twig', [
-            'article' => $article,
+        return $this->render('admin_menu/edit.html.twig', [
+            'menu' => $menu,
             'form' => $form,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_admin_article_delete', methods: ['POST'])]
-    public function delete(Request $request, Article $article, EntityManagerInterface $entityManager): Response
+    #[Route('/{id}', name: 'app_admin_menu_delete', methods: ['POST'])]
+    public function delete(Request $request, Menu $menu, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->getPayload()->get('_token'))) {
-            $entityManager->remove($article);
+        if ($this->isCsrfTokenValid('delete'.$menu->getId(), $request->getPayload()->get('_token'))) {
+            $entityManager->remove($menu);
             $entityManager->flush();
         }
 

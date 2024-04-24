@@ -36,25 +36,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column]
-    private ?string $securityQuestion = null;
-
-    #[ORM\Column]
-    private ?string $securityAnswer = null;
-
-    #[ORM\OneToMany(targetEntity: Article::class, mappedBy: 'user')]
-    private Collection $articles;
-
     /**
-     * @var Collection<int, Comment>
+     * @var Collection<int, Reservation>
      */
-    #[ORM\OneToMany(targetEntity: Comment::class, mappedBy: 'User', orphanRemoval: true)]
-    private Collection $comments;
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'user')]
+    private Collection $reservations;
 
     public function __construct()
     {
-        $this->articles = new ArrayCollection();
-        $this->comments = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -123,30 +113,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getSecurityQuestion(): ?string
-    {
-        return $this->securityQuestion;
-    }
-
-    public function setSecurityQuestion(string $securityQuestion): static
-    {
-        $this->securityQuestion = $securityQuestion;
-
-        return $this;
-    }
-
-    public function getSecurityAnswer(): ?string
-    {
-        return $this->securityAnswer;
-    }
-
-    public function setSecurityAnswer(string $securityAnswer): static
-    {
-        $this->securityAnswer = $securityAnswer;
-
-        return $this;
-    }
-
     /**
      * @see UserInterface
      */
@@ -168,59 +134,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Article>
+     * @return Collection<int, Reservation>
      */
-    public function getArticles(): Collection
+    public function getReservations(): Collection
     {
-        return $this->articles;
+        return $this->reservations;
     }
 
-    public function addArticle(Article $article): static
+    public function addReservation(Reservation $reservation): static
     {
-        if (!$this->articles->contains($article)) {
-            $this->articles->add($article);
-            $article->setUser($this);
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeArticle(Article $article): static
+    public function removeReservation(Reservation $reservation): static
     {
-        if ($this->articles->removeElement($article)) {
+        if ($this->reservations->removeElement($reservation)) {
             // set the owning side to null (unless already changed)
-            if ($article->getUser() === $this) {
-                $article->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Comment>
-     */
-    public function getComments(): Collection
-    {
-        return $this->comments;
-    }
-
-    public function addComment(Comment $comment): static
-    {
-        if (!$this->comments->contains($comment)) {
-            $this->comments->add($comment);
-            $comment->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeComment(Comment $comment): static
-    {
-        if ($this->comments->removeElement($comment)) {
-            // set the owning side to null (unless already changed)
-            if ($comment->getUser() === $this) {
-                $comment->setUser(null);
+            if ($reservation->getUser() === $this) {
+                $reservation->setUser(null);
             }
         }
 

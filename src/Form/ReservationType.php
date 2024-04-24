@@ -1,31 +1,34 @@
 <?php
 
 namespace App\Form;
-
-use App\Entity\Article;
+use App\Entity\Reservation;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ArticleType extends AbstractType
+class ReservationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         // No need for SubmitType, handle by CRUD template
         $builder
-        ->add('title', TextType::class, [
+        ->add('firstname', TextType::class, [
             'required' => true,
-            'attr' => ['placeholder' => 'Title of your article...']
+            'attr' => ['placeholder' => 'Firstname']
         ])
-        ->add('date', TextType::class, [
+        ->add('lastname', TextType::class, [
             'required' => true,
-            'attr' => ['placeholder' => 'DD/MM/YYYY']
+            'attr' => ['placeholder' => 'Lastname']
         ])
-        ->add('content', TextareaType::class, [
+        ->add('email', EmailType::class, [
             'required' => true,
-            'attr' => ['placeholder' => 'Write your article here...']
+            'attr' => ['placeholder' => 'email']
+        ])
+        ->add('date', DateTimeType::class, [
+            'required' => true
         ])
     ;
     }
@@ -33,7 +36,7 @@ class ArticleType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Article::class,
+            'data_class' => Reservation::class,
         ]);
     }
 }

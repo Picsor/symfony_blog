@@ -8,6 +8,12 @@ use Symfony\Component\Routing\Attribute\Route;
 // Allow additionnal methods like rendering template, redirect, generate url...
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
 // Add prefix to all routes inside this controller
 #[Route(path: '/admin')]
 class AdminController extends AbstractController

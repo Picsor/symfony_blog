@@ -1,0 +1,16 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Edit menu page{% endblock %}
+{% block title_header %}Edit menu{% endblock %}
+
+{% block content %}
+
+<main style="min-height: 75vh" class="container">
+    <h1>Edit Menu</h1>
+
+    {{ include('admin_menu/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a class="m-1 btn btn-warning" href="{{ path('app_admin_menu_index') }}">back to list</a>
+
+    {{ include('admin_menu/_delete_form.html.twig') }}</main>
+{% endblock content %}

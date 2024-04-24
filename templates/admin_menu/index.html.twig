@@ -1,0 +1,53 @@
+{% extends "base.html.twig" %}
+
+{% block title %}CRUD menus page{% endblock %}
+{% block title_header %}CRUD menus{% endblock %}
+
+{% block content %}
+
+<main style="min-height: 75vh" class="container">
+
+    <h1>Menus index</h1>
+
+    <table  class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Starter</th>
+                <th>Dish</th>
+                <th>Dessert</th>
+                <th>Price</th>
+                {# <th>Username</th> #}
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for menu in menus %}
+            <tr>
+                <td class="pt-3">{{ menu.id }}</td>
+                <td class="pt-3">{{ menu.name }}</td>
+                <td class="pt-3">{{ menu.starter }}</td>
+                <td class="pt-3">{{ menu.dish }}</td>
+                <td class="pt-3">{{ menu.dessert }}</td>
+                <td class="pt-3">{{ menu.price }}€</td>
+                {# <td class="pt-3">{{ menu.user.username|default('None') }}</td> #}
+                <td>
+                    <a class="m-1 btn btn-info" href="{{ path('app_admin_menu_show', {'id': menu.id}) }}">show</a>
+                    <a class="m-1 btn btn-warning" href="{{ path('app_admin_menu_edit', {'id': menu.id}) }}">edit</a>
+                    <a class="m-1 btn btn-danger" href="{{ path('app_admin_menu_delete', {'id': menu.id}) }}">delete</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center">
+    <a class="btn btn-success" href="{{ path('app_admin_menu_new') }}">Create new</a>
+    </div>
+</main>
+{% endblock content %}
